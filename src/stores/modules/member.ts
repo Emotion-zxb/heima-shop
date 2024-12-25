@@ -25,8 +25,19 @@ export const useMemberStore = defineStore(
       clearProfile,
     }
   },
-  // TODO: 持久化
+  // 持久化
+  // persist: true h5写法
   {
-    persist: true,
+    persist: {
+      // 小程序写法
+      storage: {
+        getItem(key) {
+          return uni.getStorageSync(key)
+        },
+        setItem(key, value) {
+          uni.setStorageSync(key, value)
+        },
+      },
+    },
   },
 )

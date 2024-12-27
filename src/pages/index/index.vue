@@ -10,14 +10,17 @@
       :refresher-triggered="triggered"
       @refresherrefresh="onRefresherrefresh"
     >
-      <!-- 轮播图 -->
-      <XtxSwiper :list="BannerData"></XtxSwiper>
-      <!-- 分类 -->
-      <CategoryPanel :list="categoryData"></CategoryPanel>
-      <!-- 热门推荐 -->
-      <HotPanel :list="hotData"></HotPanel>
-      <!-- 猜你喜欢 -->
-      <XtxGuess ref="guessRef"></XtxGuess>
+      <Skeleton v-if="isLoading"></Skeleton>
+      <template v-else>
+        <!-- 轮播图 -->
+        <XtxSwiper :list="BannerData"></XtxSwiper>
+        <!-- 分类 -->
+        <CategoryPanel :list="categoryData"></CategoryPanel>
+        <!-- 热门推荐 -->
+        <HotPanel :list="hotData"></HotPanel>
+        <!-- 猜你喜欢 -->
+        <XtxGuess ref="guessRef"></XtxGuess>
+      </template>
     </scroll-view>
   </view>
 </template>
@@ -27,6 +30,7 @@ import { onLoad } from '@dcloudio/uni-app'
 import CustomNavbar from './components/CustomNavbar.vue'
 import CategoryPanel from './components/CategoryPanel.vue'
 import HotPanel from './components/HotPanel.vue'
+import Skeleton from './components/Skeleton.vue'
 import { getHomeBannerAPI, getHomeCategoryAPI, getHomeHotAPI } from '@/services/home'
 import { ref } from 'vue'
 import type { BannerItem, CategoryItem, HotItem } from '@/types/home/home'
@@ -40,6 +44,8 @@ const hotData = ref<HotItem[]>([]) // 热门推荐
 const guessRef = ref<XtxGuessInstance>() // XtxGuessInstance 是组件的实例类型
 
 let triggered = ref(false) // 下拉刷新的状态
+
+let isLoading = ref(true) // 控制骨架屏是否展示
 
 async function getHomeBannerData() {
   // 删除了 .then的写法
@@ -87,9 +93,16 @@ function onRefresherrefresh() {
 }
 
 onLoad(() => {
-  getHomeBannerData()
-  getHomeCategoryData()
-  getHomeHotData()
+  isLoading.value = true
+
+  Promise.all([getHomeBannerData(), getHomeCategoryData(), getHomeHotData()])
+    .then(() => {
+      isLoading.value = false
+    })
+    .catch((error) => {
+      isLoading.value = false
+      console.error(error)
+    })
 })
 </script>
 

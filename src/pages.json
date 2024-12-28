@@ -48,6 +48,13 @@
       {
         "navigationBarTitleText" : "热门推荐"
       }
+    },
+    {
+      "path" : "pages/goods/goods",
+      "style" : 
+      {
+        "navigationBarTitleText" : "商品的详情页"
+      }
     }
   ],
   "globalStyle": {

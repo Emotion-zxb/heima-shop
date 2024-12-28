@@ -1,5 +1,6 @@
 <template>
-  <view class="viewport">
+  <Skeleton v-if="!isFinish"></Skeleton>
+  <view class="viewport" v-else>
     <!-- 搜索框 -->
     <view class="search">
       <view class="input">
@@ -36,7 +37,7 @@
               :key="goods.id"
               class="goods"
               hover-class="none"
-              :url="`/pages/goods/goods?id=`"
+              :url="`/pages/goods/goods?id=${goods.id}`"
             >
               <image class="image" :src="goods.picture"> </image>
               <view class="name ellipsis">{{ goods.name }}</view>
@@ -59,6 +60,7 @@ import { getHomeBannerAPI } from '@/services/home'
 import { getCategoryTopAPI } from '@/services/category'
 import { onLoad } from '@dcloudio/uni-app'
 import type { CategoryTopItem } from '@/types/category'
+import Skeleton from './components/skeleton.vue'
 
 const BannerData = ref<BannerItem[]>([]) // 轮播图数据
 let activeIndex = ref(0) // 左侧分类的激活项
@@ -72,10 +74,9 @@ async function getHomeBannerData() {
 // 一级/二级/三级数据
 const categoryData = ref<CategoryTopItem[]>([])
 // 获取一级/二级/三级的数据
-function getCategoryTopData() {
-  getCategoryTopAPI().then((res) => {
-    categoryData.value = res.result
-  })
+async function getCategoryTopData() {
+  const res = await getCategoryTopAPI()
+  categoryData.value = res.result
 }
 // 计算属性: subCategoryData二级/三级的数据
 const subCategoryData = computed(() => {
@@ -83,9 +84,16 @@ const subCategoryData = computed(() => {
   return categoryData.value[activeIndex.value]?.children || []
 })
 
+let isFinish = ref(false)
+
 onLoad(() => {
-  getHomeBannerData()
-  getCategoryTopData()
+  Promise.all([getHomeBannerData(), getCategoryTopData()])
+    .then(() => {
+      isFinish.value = true
+    })
+    .catch(() => {
+      isFinish.value = true
+    })
 })
 </script>
 
